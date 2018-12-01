@@ -3,6 +3,8 @@ package cn.controller;
 
 import cn.pojo.Address;
 import cn.service.AddressmanageService;
+import cn.util.RedisUtil;
+import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -28,6 +30,11 @@ public class AddressmanageContraller {
     public void setAddressmanageService(AddressmanageService addressmanageService) {
         this.local = addressmanageService;
     }
+
+    @Autowired
+    @Qualifier("RedisTakes")
+    private RedisUtil res;
+
 
     @ResponseBody
     @RequestMapping(value = "addLocal.html",method = RequestMethod.POST)
@@ -63,5 +70,19 @@ public class AddressmanageContraller {
     @ApiOperation(value="查找用户单条收货地址",httpMethod="GET",notes="返回查询情况")
     public String selLocalInfo(@ApiParam(required = true, name ="aid", value ="地址ID")@PathVariable("aid")int aid, @ApiParam(required = true, name ="uid", value ="用户ID")@PathVariable("uid")int uid){
         return local.selLoncalinfo(aid,uid);
+    }
+    @ResponseBody
+    @RequestMapping(value = "set",method = RequestMethod.GET)
+    @ApiOperation(value="redis",httpMethod="GET",notes="返回查询情况")
+    public String redis(@RequestParam("key") String key,@RequestParam("value") String value){
+        boolean set = res.set(key, value);
+        String str;
+        if (set){
+            String qwe = (String)res.get(key);
+            str = JSON.toJSONString(qwe);
+        }else {
+            str = JSON.toJSONString("失败");
+        }
+        return str;
     }
 }
