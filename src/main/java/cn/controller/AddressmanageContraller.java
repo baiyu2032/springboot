@@ -78,7 +78,7 @@ public class AddressmanageContraller {
         boolean set = res.set(key, value);
         String str;
         if (set){
-            String qwe = (String)res.get(key);
+            Object qwe = res.get(key);
             str = JSON.toJSONString(qwe);
         }else {
             str = JSON.toJSONString("Ê§°Ü");

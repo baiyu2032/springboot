@@ -50,6 +50,16 @@ spring:
         #最小空闲
         min-idle: 0
     password: 12345678
+#redis集群
+#spring:
+#  redis:
+#    cluster:
+#      nodes: 148.70.68.230:8001,148.70.68.230:8002,148.70.68.230:8003,148.70.68.230:8004,148.70.68.230:8005,148.70.68.230:8006
+#    jedis:
+#      pool:
+#        max-active: 8
+#        max-idle: 100
+#        min-idle: 10
 ---
 spring:
   security:

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -14,6 +13,7 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,7 +24,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
- * Redis 配置类
+ * Redis单机版 配置类序列化
  *
  * @author Leon
  * @version 2018/6/17 17:46
@@ -37,7 +37,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     /**
      * Logger
      */
-   // private static final Logger lg = LoggerFactory.getLogger(RedisConfiguration.class);
+    // private static final Logger lg = LoggerFactory.getLogger(RedisConfiguration.class);
 
 
     @Autowired
@@ -58,7 +58,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                 sb.append(":" + String.valueOf(obj));
             }
             String rsToUse = String.valueOf(sb);
-         //   lg.info("自动生成Redis Key -> [{}]", rsToUse);
+            //   lg.info("自动生成Redis Key -> [{}]", rsToUse);
             return rsToUse;
         };
     }
@@ -102,22 +102,22 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         CacheErrorHandler cacheErrorHandler = new CacheErrorHandler() {
             @Override
             public void handleCacheGetError(RuntimeException e, Cache cache, Object key) {
-               // lg.error("Redis occur handleCacheGetError：key -> [{}]", key, e);
+                // lg.error("Redis occur handleCacheGetError：key -> [{}]", key, e);
             }
 
             @Override
             public void handleCachePutError(RuntimeException e, Cache cache, Object key, Object value) {
-              //  lg.error("Redis occur handleCachePutError：key -> [{}]；value -> [{}]", key, value, e);
+                //  lg.error("Redis occur handleCachePutError：key -> [{}]；value -> [{}]", key, value, e);
             }
 
             @Override
             public void handleCacheEvictError(RuntimeException e, Cache cache, Object key)    {
-              //  lg.error("Redis occur handleCacheEvictError：key -> [{}]", key, e);
+                //  lg.error("Redis occur handleCacheEvictError：key -> [{}]", key, e);
             }
 
             @Override
             public void handleCacheClearError(RuntimeException e, Cache cache) {
-              //  lg.error("Redis occur handleCacheClearError：", e);
+                //  lg.error("Redis occur handleCacheClearError：", e);
             }
         };
         return cacheErrorHandler;
@@ -126,19 +126,23 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     /**
      * 此内部类就是把yml的配置数据，进行读取，创建JedisConnectionFactory和JedisPool，以供外部类初始化缓存管理器使用
      * 不了解的同学可以去看@ConfigurationProperties和@Value的作用
+     * PropertySource读取redis配置文件
      *
      */
-    @ConfigurationProperties
+    @Configuration
+    @PropertySource("classpath:redis.properties")
     class DataJedisProperties{
-        @Value("47.94.223.165")
+        @Value("${redis.hostName}")
         private  String host;
-        @Value("6379")
+        @Value("${redis.port}")
         private  int port;
-        @Value("0")
+        @Value("${redis.password}")
+        private String password;
+        @Value("${redis.timeout}")
         private  int timeout;
-        @Value("8")
+        @Value("${redis.maxIdle}")
         private int maxIdle;
-        @Value("1")
+        @Value("${redis.maxWaitMillis}")
         private long maxWaitMillis;
 
         @Bean
@@ -148,18 +152,17 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             factory.setHostName(host);
             factory.setPort(port);
             factory.setTimeout(timeout);
+            factory.setPassword(password);
             return factory;
         }
         @Bean
         public JedisPool redisPoolFactory() {
-           // lg.info("JedisPool init successful，host -> [{}]；port -> [{}]", host, port);
+            // lg.info("JedisPool init successful，host -> [{}]；port -> [{}]", host, port);
             JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
             jedisPoolConfig.setMaxIdle(maxIdle);
             jedisPoolConfig.setMaxWaitMillis(maxWaitMillis);
-
             JedisPool jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout);
             return jedisPool;
         }
     }
-
 }
