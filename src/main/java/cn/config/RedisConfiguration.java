@@ -161,7 +161,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
             jedisPoolConfig.setMaxIdle(maxIdle);
             jedisPoolConfig.setMaxWaitMillis(maxWaitMillis);
-            JedisPool jedisPool = new JedisPool(jedisPoolConfig, host, port, timeout);
+            JedisPool jedisPool = new JedisPool(jedisPoolConfig, host, port,timeout,password);
             return jedisPool;
         }
     }
